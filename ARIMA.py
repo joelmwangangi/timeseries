@@ -2,7 +2,8 @@ import yfinance as yf
 import pandas as pd
 from statsmodels.tsa.arima.model import ARIMA
 import streamlit as st
-import plotly.graph_objects as go
+import matplotlib.pyplot as plt
+import matplotlib.dates as mdates
 
 # Function to fetch data, fit ARIMA model, and display results
 def run_arima_model():
@@ -31,35 +32,31 @@ def run_arima_model():
         forecast = model_fit.forecast(steps=forecast_steps)
         future_dates = pd.date_range(start=stock_data.index[-1], periods=forecast_steps + 1, freq='B')[1:]
         
-        # Plotting the data and forecast with Plotly
-        fig = go.Figure()
+        # Plotting the data and forecast with Matplotlib
+        fig, ax = plt.subplots(figsize=(10, 6))
 
-        # Add actual stock prices (Historical data)
-        fig.add_trace(go.Scatter(x=stock_data.index, y=stock_data['Close'], mode='lines', name='Historical Stock Prices',
-                                 line=dict(color='royalblue', width=2), opacity=0.8))
+        # Plot historical data
+        ax.plot(stock_data.index, stock_data['Close'], label='Historical Stock Prices', color='royalblue', linewidth=2)
 
-        # Add forecasted values (Forecast data)
-        fig.add_trace(go.Scatter(x=future_dates, y=forecast, mode='lines', name='Forecasted Stock Prices',
-                                 line=dict(color='darkorange', width=3, dash='dash'), opacity=0.9))
+        # Plot forecasted data
+        ax.plot(future_dates, forecast, label='Forecasted Stock Prices', color='darkorange', linewidth=2, linestyle='--')
 
         # Add shading for forecasted period
-        fig.add_trace(go.Scatter(x=future_dates, y=forecast, mode='lines', name='Forecast Area',
-                                 fill='tonexty', fillcolor='rgba(255, 165, 0, 0.2)', line=dict(color='orange', width=0),
-                                 showlegend=False))
+        ax.fill_between(future_dates, forecast, color='orange', alpha=0.2, label='Forecast Area')
 
-        # Set plot titles and labels
-        fig.update_layout(
-            title=f'{ticker_symbol} Stock Price Forecast (Next 30 Days)',
-            xaxis_title='Date',
-            yaxis_title='Closing Price (USD)',
-            template='plotly',  # Use default Plotly theme for better visibility
-            hovermode='x unified',
-            plot_bgcolor='white',  # Set background to white for a clean look
-            xaxis_rangeslider_visible=False  # Disable range slider for cleaner look
-        )
+        # Formatting the plot
+        ax.set_title(f'{ticker_symbol} Stock Price Forecast (Next 30 Days)', fontsize=16)
+        ax.set_xlabel('Date', fontsize=12)
+        ax.set_ylabel('Closing Price (USD)', fontsize=12)
+        ax.legend()
 
-        # Show the interactive plot
-        st.plotly_chart(fig)
+        # Rotate x-axis labels for better visibility
+        plt.xticks(rotation=45)
+        ax.xaxis.set_major_locator(mdates.MonthLocator())
+        ax.xaxis.set_major_formatter(mdates.DateFormatter('%Y-%m-%d'))
+
+        # Display the plot in Streamlit
+        st.pyplot(fig)
     
     except Exception as e:
         st.error(f"An error occurred: {e}")
