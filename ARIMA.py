@@ -34,18 +34,28 @@ def run_arima_model():
         # Plotting the data and forecast with Plotly
         fig = go.Figure()
 
-        # Add actual stock prices
-        fig.add_trace(go.Scatter(x=stock_data.index, y=stock_data['Close'], mode='lines', name='Actual Stock Prices'))
+        # Add actual stock prices (Historical data)
+        fig.add_trace(go.Scatter(x=stock_data.index, y=stock_data['Close'], mode='lines', name='Historical Stock Prices',
+                                 line=dict(color='blue', width=2), opacity=0.7))
 
-        # Add forecasted values
-        fig.add_trace(go.Scatter(x=future_dates, y=forecast, mode='lines', name='Forecasted Stock Prices', line=dict(color='red')))
+        # Add forecasted values (Forecast data)
+        fig.add_trace(go.Scatter(x=future_dates, y=forecast, mode='lines', name='Forecasted Stock Prices',
+                                 line=dict(color='red', width=3, dash='dash'), opacity=0.9))
+
+        # Add shading for forecasted period
+        fig.add_trace(go.Scatter(x=future_dates, y=forecast, mode='lines', name='Forecast Area',
+                                 fill='tonexty', fillcolor='rgba(255, 0, 0, 0.2)', line=dict(color='red', width=0),
+                                 showlegend=False))
 
         # Set plot titles and labels
         fig.update_layout(
             title=f'{ticker_symbol} Stock Price Forecast (Next 30 Days)',
             xaxis_title='Date',
             yaxis_title='Closing Price (USD)',
-            template='plotly_dark'
+            template='plotly_dark',
+            hovermode='x unified',
+            plot_bgcolor='rgba(0, 0, 0, 0)',  # Transparent background
+            xaxis_rangeslider_visible=False  # Disable range slider for cleaner look
         )
 
         # Show the interactive plot
