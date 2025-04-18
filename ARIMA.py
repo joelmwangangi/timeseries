@@ -31,11 +31,6 @@ def run_arima_model():
         forecast = model_fit.forecast(steps=forecast_steps)
         future_dates = pd.date_range(start=stock_data.index[-1], periods=forecast_steps + 1, freq='B')[1:]
         
-        # Display the forecasted values
-        forecasted_values = pd.DataFrame(forecast, index=future_dates, columns=['Forecast'])
-        st.subheader("Forecasted Values")
-        st.write(forecasted_values)
-        
         # Plotting the data and forecast with Plotly
         fig = go.Figure()
 
